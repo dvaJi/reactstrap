@@ -2,6 +2,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { Modal, ModalBody, ModalHeader, ModalFooter, Button } from '../';
+import { JSDOM } from 'jsdom';
 
 describe('Modal', () => {
   let isOpen;
@@ -831,4 +832,23 @@ describe('Modal', () => {
 
     wrapper.unmount();
   });
+
+  it('should render using a different document', () => {
+    isOpen = true;
+
+    const dom = new JSDOM(`<!DOCTYPE html><html><head></head><body><h1>New frame</h1><div id="content"></div></body></html>`);
+    const frameDocument = dom.window.document;
+
+    const wrapper = mount(
+      <Modal isOpen={isOpen} toggle={toggle} document={frameDocument}>
+        <ModalBody>
+          <Button color="secondary" onClick={toggle}>Cancel</Button>
+        </ModalBody>
+      </Modal>
+    );
+
+    expect(wrapper.childAt(0).children().length).not.toBe(0);
+
+    wrapper.unmount();
+  })
 });
